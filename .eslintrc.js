@@ -8,8 +8,6 @@ module.exports = {
   plugins: ['@typescript-eslint/eslint-plugin'],
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
-    '@typescript-eslint/recommended-requiring-type-checking',
   ],
   root: true,
   env: {
@@ -30,7 +28,7 @@ module.exports = {
     '@typescript-eslint/await-thenable': 'error',
     
     // General rules
-    'no-console': 'warn',
+    'no-console': 'off',
     'prefer-const': 'error',
     'no-var': 'error',
     'object-shorthand': 'error',

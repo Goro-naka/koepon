@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: koepon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-koepon}
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docs/design/koepon/database-schema.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./seeds:/docker-entrypoint-initdb.d/seeds:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-postgres} -d ${DATABASE_NAME:-koepon}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - koepon-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: koepon-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - koepon-network
+
+  # Application Server (for development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: koepon-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3000}
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-password}
+      DATABASE_NAME: ${DATABASE_NAME:-koepon}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key-change-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - app_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - koepon-network
+    profiles:
+      - dev
+
+  # PgAdmin (Database Administration Tool)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: koepon-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@koepon.jp}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - koepon-network
+    profiles:
+      - tools
+
+  # Redis Commander (Redis Administration Tool)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: koepon-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: redis:redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - koepon-network
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  app_logs:
+    driver: local
+
+networks:
+  koepon-network:
+    driver: bridge

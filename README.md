@@ -58,16 +58,14 @@ cp .env.example .env
 
 ### 4. Docker環境起動
 ```bash
-docker-compose up -d
+# 自動セットアップスクリプト実行
+npm run db:setup
+
+# または手動でコンテナ起動
+docker-compose up -d postgres redis
 ```
 
-### 5. データベース初期化
-```bash
-npm run migration:run
-npm run seed:run
-```
-
-### 6. 開発サーバー起動
+### 5. 開発サーバー起動
 ```bash
 npm run dev
 ```
@@ -100,19 +98,24 @@ npm run format:check
 npm run typecheck
 ```
 
-### データベース関連
+### Docker & データベース関連
 ```bash
-# マイグレーション作成
+# 開発環境セットアップ
+npm run db:setup
+
+# データベースリセット
+npm run db:reset
+
+# Docker コンテナ管理
+npm run docker:dev     # アプリ含む全コンテナ起動
+npm run docker:tools   # 管理ツール起動 (PgAdmin, Redis Commander)
+npm run docker:stop    # 全コンテナ停止
+npm run docker:logs    # ログ表示
+
+# マイグレーション関連
 npm run migration:create -- CreateUserTable
-
-# マイグレーション実行
 npm run migration:run
-
-# マイグレーションロールバック
 npm run migration:revert
-
-# シードデータ投入
-npm run seed:run
 ```
 
 ## 🏗️ プロジェクト構造
