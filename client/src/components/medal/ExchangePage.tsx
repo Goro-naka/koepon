@@ -5,7 +5,6 @@ import { formatMedalAmountWithUnit } from '@/lib/medal-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,7 @@ import { ExchangeItemGrid } from './components/ExchangeItemGrid'
 export const ExchangePage: React.FC = () => {
   const [showExchangeModal, setShowExchangeModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
-  const [selectedVtuber, setSelectedVtuber] = useState<string>('星月ひな')
+  const [selectedVtuber, setSelectedVtuber] = useState<string>('')
 
   const {
     exchangeItems,
@@ -48,6 +47,13 @@ export const ExchangePage: React.FC = () => {
       fetchExchangeItems()
     }
   }, [exchangeItems.length, fetchExchangeItems])
+
+  // VTuberが未選択で、VTuberが存在する場合は最初のVTuberを自動選択
+  useEffect(() => {
+    if (!selectedVtuber && vtubers.length > 0) {
+      setSelectedVtuber(vtubers[0].vtuberName)
+    }
+  }, [selectedVtuber, vtubers])
 
   if (exchangeItemsLoading) {
     return (
@@ -142,111 +148,147 @@ export const ExchangePage: React.FC = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">アイテム交換所</h1>
 
-      {/* VTuber選択タブ */}
-      <Tabs value={selectedVtuber} onValueChange={setSelectedVtuber} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          {vtubers.map((vtuber) => (
-            <TabsTrigger key={vtuber.vtuberName} value={vtuber.vtuberName}>
-              {vtuber.vtuberName}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        
-        {vtubers.map((vtuber) => (
-          <TabsContent key={vtuber.vtuberName} value={vtuber.vtuberName} className="space-y-6">
-            {/* VTuber別メダル残高表示 */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">
-                      {vtuber.vtuberName.charAt(0)}
-                    </span>
+      {/* VTuber選択 */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div className="flex-1">
+          <label htmlFor="vtuber-select" className="block text-sm font-medium text-gray-700 mb-2">
+            VTuberを選択
+          </label>
+          <Select value={selectedVtuber} onValueChange={setSelectedVtuber}>
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="VTuberを選択してください" />
+            </SelectTrigger>
+            <SelectContent>
+              {vtubers.map((vtuber) => (
+                <SelectItem key={vtuber.vtuberName} value={vtuber.vtuberName}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        {vtuber.vtuberName.charAt(0)}
+                      </span>
+                    </div>
+                    <span>{vtuber.vtuberName}</span>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">{vtuber.vtuberName}</h3>
-                    <p className="text-sm text-gray-600">のアイテム交換所</p>
-                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* VTuberが存在しない場合 */}
+      {vtubers.length === 0 ? (
+        <div className="text-center py-16 max-w-md mx-auto">
+          <div className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+              <div className="text-purple-500 text-2xl">👤</div>
+            </div>
+          </div>
+          <h3 className="text-2xl font-medium text-gray-900 mb-4">VTuberが見つかりません</h3>
+          <p className="text-gray-700 mb-8 leading-relaxed">
+            現在登録されているVTuberがいません。<br />
+            メダルを獲得すると交換所が利用できるようになります。
+          </p>
+        </div>
+      ) : (
+        /* 選択されたVTuberの詳細 */
+        vtubers.find(v => v.vtuberName === selectedVtuber) && (
+        <div className="space-y-6">
+          {/* VTuber情報カード */}
+          <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 p-6 rounded-xl border border-purple-100 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-2xl">
+                    {selectedVtuber.charAt(0)}
+                  </span>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm text-gray-600">保有メダル</div>
-                  <div className="text-2xl font-bold text-purple-600">
-                    {vtuber.balance.toLocaleString()}
-                  </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">{selectedVtuber}</h2>
+                  <p className="text-gray-600">のアイテム交換所</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {exchangeItems.filter(item => item.vtuberName === selectedVtuber).length}個のアイテムが利用可能
+                  </p>
+                </div>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 text-center">
+                <div className="text-sm text-gray-600 mb-1">保有メダル</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  {getMedalBalanceByVtuber(selectedVtuber).toLocaleString()}
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Search and Filter */}
-            <div className="flex flex-col md:flex-row gap-4">
-              <Input
-                placeholder="アイテムを検索..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
-              />
-              
-              <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">新着順</SelectItem>
-                  <SelectItem value="cost">価格順</SelectItem>
-                  <SelectItem value="name">名前順</SelectItem>
-                  <SelectItem value="popular">人気順</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                variant={itemFilters.category === '' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setItemFilters({ category: '' })}
-              >
-                すべて
-              </Button>
-              <Button
-                variant={itemFilters.category === 'voice' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setItemFilters({ category: 'voice' })}
-              >
-                ボイス
-              </Button>
-              <Button
-                variant={itemFilters.category === 'goods' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setItemFilters({ category: 'goods' })}
-              >
-                グッズ
-              </Button>
-              <Button
-                variant={itemFilters.category === 'special' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setItemFilters({ category: 'special' })}
-              >
-                特典
-              </Button>
-              <Button
-                variant={itemFilters.category === 'limited' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setItemFilters({ category: 'limited' })}
-              >
-                限定
-              </Button>
-            </div>
-
-            {/* Exchange Items Grid */}
-            <ExchangeItemGrid
-              items={exchangeItems.filter(item => item.vtuberName === vtuber.vtuberName)}
-              onExchangeClick={handleExchangeClick}
-              checkSufficientBalance={(amount) => checkSufficientBalanceForVtuber(vtuber.vtuberName, amount)}
+          {/* Search and Filter */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <Input
+              placeholder="アイテムを検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
             />
-          </TabsContent>
-        ))}
-      </Tabs>
+            
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+              <SelectTrigger className="w-full md:w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">新着順</SelectItem>
+                <SelectItem value="cost">価格順</SelectItem>
+                <SelectItem value="name">名前順</SelectItem>
+                <SelectItem value="popular">人気順</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant={itemFilters.category === '' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setItemFilters({ category: '' })}
+            >
+              すべて
+            </Button>
+            <Button
+              variant={itemFilters.category === 'voice' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setItemFilters({ category: 'voice' })}
+            >
+              ボイス
+            </Button>
+            <Button
+              variant={itemFilters.category === 'digital' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setItemFilters({ category: 'digital' })}
+            >
+              デジタル
+            </Button>
+            <Button
+              variant={itemFilters.category === 'video' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setItemFilters({ category: 'video' })}
+            >
+              動画
+            </Button>
+            <Button
+              variant={itemFilters.category === 'collectible' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setItemFilters({ category: 'collectible' })}
+            >
+              コレクティブル
+            </Button>
+          </div>
+
+          {/* Exchange Items Grid */}
+          <ExchangeItemGrid
+            items={exchangeItems.filter(item => item.vtuberName === selectedVtuber)}
+            onExchangeClick={handleExchangeClick}
+            checkSufficientBalance={(amount) => checkSufficientBalanceForVtuber(selectedVtuber, amount)}
+          />
+        </div>
+      ))}
 
       {/* Exchange Confirmation Modal */}
       <Dialog open={showExchangeModal} onOpenChange={setShowExchangeModal}>
