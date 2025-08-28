@@ -1,17 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "api/index.js": {
-      "runtime": "@vercel/node"
+    "api/*.js": {
+      "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/index.js"
+      "destination": "/api/index"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
