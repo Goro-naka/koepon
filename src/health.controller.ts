@@ -1,25 +1,24 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
-import { Database } from './shared/types/supabase.types';
 
 @ApiTags('Health')
 @Controller('health')
 export class HealthController {
-  private readonly supabase: SupabaseClient<Database>;
-  private readonly adminClient: SupabaseClient<Database>;
+  private readonly supabase: SupabaseClient;
+  private readonly adminClient: SupabaseClient;
 
   constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
       throw new Error('Supabase configuration is missing');
     }
 
-    this.supabase = createClient<Database>(supabaseUrl, anonKey);
-    this.adminClient = createClient<Database>(supabaseUrl, serviceRoleKey);
+    this.supabase = createClient(supabaseUrl, anonKey);
+    this.adminClient = createClient(supabaseUrl, serviceRoleKey);
   }
 
   @Get()

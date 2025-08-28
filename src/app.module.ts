@@ -13,6 +13,7 @@ import { PushMedalModule } from './modules/push-medal/push-medal.module';
 import { VTuberDashboardModule } from './modules/vtuber-dashboard/vtuber-dashboard.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { CustomLoggerService } from './common/logger/logger.service';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -61,7 +62,7 @@ import { CustomLoggerService } from './common/logger/logger.service';
       },
     ]),
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [
     CustomLoggerService,
     {
