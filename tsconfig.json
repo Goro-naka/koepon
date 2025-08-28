@@ -29,12 +29,18 @@
     "esModuleInterop": true
   },
   "include": [
-    "src/**/*",
-    "test/**/*"
+    "src/main.ts",
+    "src/app.module.ts", 
+    "src/health.controller.ts",
+    "src/common/logger/logger.service.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "coverage"
+    "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/__tests__/**/*",
+    "src/test/**/*"
   ]
 }

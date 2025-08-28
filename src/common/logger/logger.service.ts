@@ -1,8 +1,8 @@
-import { ConsoleLogger, Injectable, LoggerService } from '@nestjs/common';
+import { ConsoleLogger, Injectable, LoggerService, LogLevel } from '@nestjs/common';
 
 @Injectable()
 export class CustomLoggerService extends ConsoleLogger implements LoggerService {
-  private logLevels = {
+  private logLevels: Record<string, number> = {
     error: 0,
     warn: 1,
     log: 2,
@@ -19,9 +19,9 @@ export class CustomLoggerService extends ConsoleLogger implements LoggerService 
     this.setLogLevels(this.getLogLevelsForLevel(logLevel));
   }
 
-  private getLogLevelsForLevel(level: string): string[] {
+  private getLogLevelsForLevel(level: string): LogLevel[] {
     const currentLevel = this.logLevels[level] ?? this.logLevels.log;
-    const levels = [];
+    const levels: LogLevel[] = [];
 
     if (currentLevel >= this.logLevels.error) levels.push('error');
     if (currentLevel >= this.logLevels.warn) levels.push('warn');

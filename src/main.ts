@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CustomLoggerService } from './common/logger/logger.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { CustomValidationPipe } from './common/pipes/validation.pipe';
+import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
@@ -48,7 +48,7 @@ async function bootstrap() {
   app.use(compression());
 
   // Global pipes, filters, and interceptors
-  app.useGlobalPipes(new CustomValidationPipe(logger));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter(logger));
   app.useGlobalInterceptors(new LoggingInterceptor(logger));
 
