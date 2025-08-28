@@ -209,3 +209,4 @@ build/
 
 # Husky
 .husky/_
+.vercel

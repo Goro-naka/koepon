@@ -1,0 +1,226 @@
+version: '3.8'
+
+services:
+  # Performance test environment for Koepon application
+  koepon-app:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=performance-test
+      - DATABASE_URL=postgresql://koepon:secure_pass@postgres:5432/koepon_perf
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=performance-test-jwt-secret-key
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - perf-network
+
+  # PostgreSQL database with performance tuning
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=koepon_perf
+      - POSTGRES_USER=koepon
+      - POSTGRES_PASSWORD=secure_pass
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+    volumes:
+      - perf_postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/performance-tuning.conf:/etc/postgresql/postgresql.conf
+    command: >
+      postgres
+        -c config_file=/etc/postgresql/postgresql.conf
+        -c shared_preload_libraries=pg_stat_statements
+        -c pg_stat_statements.track=all
+        -c max_connections=200
+        -c shared_buffers=512MB
+        -c effective_cache_size=2GB
+        -c work_mem=16MB
+        -c maintenance_work_mem=256MB
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c default_statistics_target=100
+        -c random_page_cost=1.1
+        -c effective_io_concurrency=200
+        -c min_wal_size=1GB
+        -c max_wal_size=4GB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U koepon -d koepon_perf"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - perf-network
+
+  # Redis cache with performance configuration
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+        --maxmemory 512mb
+        --maxmemory-policy allkeys-lru
+        --save 900 1
+        --save 300 10
+        --save 60 10000
+        --appendonly yes
+        --appendfsync everysec
+        --auto-aof-rewrite-percentage 100
+        --auto-aof-rewrite-min-size 64mb
+    volumes:
+      - perf_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - perf-network
+
+  # InfluxDB for k6 metrics storage
+  influxdb:
+    image: influxdb:2.7-alpine
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=k6
+      - DOCKER_INFLUXDB_INIT_PASSWORD=k6password
+      - DOCKER_INFLUXDB_INIT_ORG=performance-testing
+      - DOCKER_INFLUXDB_INIT_BUCKET=k6-metrics
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=k6-performance-token-2024
+    volumes:
+      - perf_influxdb_data:/var/lib/influxdb2
+      - perf_influxdb_config:/etc/influxdb2
+    networks:
+      - perf-network
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:10.2.0
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=performance123
+      - GF_INSTALL_PLUGINS=grafana-k6-app
+    volumes:
+      - perf_grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    depends_on:
+      - influxdb
+    networks:
+      - perf-network
+
+  # Prometheus for system metrics
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - perf_prometheus_data:/prometheus
+    networks:
+      - perf-network
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - perf-network
+
+  # PostgreSQL Exporter for database metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.14.0
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://koepon:secure_pass@postgres:5432/koepon_perf?sslmode=disable
+    depends_on:
+      - postgres
+    networks:
+      - perf-network
+
+  # k6 test runner (for automated test execution)
+  k6:
+    image: grafana/k6:0.47.0
+    working_dir: /performance-tests
+    volumes:
+      - .:/performance-tests
+    environment:
+      - BASE_URL=http://koepon-app:3000
+      - K6_OUT=influxdb=http://influxdb:8086/k6-metrics
+    depends_on:
+      koepon-app:
+        condition: service_healthy
+    networks:
+      - perf-network
+    profiles:
+      - testing
+
+volumes:
+  perf_postgres_data:
+    driver: local
+  perf_redis_data:
+    driver: local
+  perf_influxdb_data:
+    driver: local
+  perf_influxdb_config:
+    driver: local
+  perf_grafana_data:
+    driver: local
+  perf_prometheus_data:
+    driver: local
+
+networks:
+  perf-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

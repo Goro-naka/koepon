@@ -1,0 +1,320 @@
+name: Staging Deployment
+
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches: [staging]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # テストスイート実行
+  test-suite:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: koepon_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          cd client && npm ci
+          cd ../api && npm ci
+          
+      - name: Lint check
+        run: |
+          cd client && npm run lint
+          cd ../api && npm run lint
+          
+      - name: Type check
+        run: |
+          cd client && npm run type-check
+          cd ../api && npm run build
+          
+      - name: Unit tests
+        run: |
+          cd client && npm run test
+          cd ../api && npm run test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/koepon_test
+          
+      - name: Security tests
+        run: |
+          cd security-tests && npm run test:security
+          
+      - name: Performance tests (Light)
+        run: |
+          cd performance-tests && npm run test:api
+
+  # Supabase 環境管理
+  deploy-supabase:
+    name: Deploy Supabase
+    needs: test-suite
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+          
+      - name: Link to Staging Project
+        run: supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          
+      - name: Deploy Database Changes
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          
+      - name: Deploy Edge Functions
+        run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          
+      - name: Seed Test Data
+        run: |
+          psql "$SUPABASE_DB_URL" -c "SELECT create_staging_test_data();"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
+
+  # Frontend Deployment (Vercel)  
+  deploy-frontend:
+    name: Deploy Frontend to Vercel
+    needs: [test-suite, deploy-supabase]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+        
+      - name: Deploy to Vercel Staging
+        run: |
+          cd client
+          vercel --token ${{ secrets.VERCEL_TOKEN }} \
+            --env NODE_ENV=staging \
+            --env NEXT_PUBLIC_SUPABASE_URL=${{ secrets.SUPABASE_STAGING_URL }} \
+            --env NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_STAGING_ANON_KEY }} \
+            --env SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_STAGING_SERVICE_KEY }} \
+            --env REDIS_URL=${{ secrets.UPSTASH_STAGING_REDIS_URL }} \
+            --env NEXT_PUBLIC_SITE_URL=https://staging-koepon.vercel.app \
+            --build-env NODE_ENV=staging \
+            --scope ${{ secrets.VERCEL_ORG_ID }} \
+            --project-name koepon-staging \
+            --prod
+            
+  # バックエンド Deployment (Vercel Functions)
+  deploy-backend:
+    name: Deploy Backend APIs
+    needs: deploy-supabase
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+        
+      - name: Deploy API to Vercel
+        run: |
+          cd api
+          vercel --token ${{ secrets.VERCEL_TOKEN }} \
+            --env NODE_ENV=staging \
+            --env SUPABASE_URL=${{ secrets.SUPABASE_STAGING_URL }} \
+            --env SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_STAGING_SERVICE_KEY }} \
+            --env REDIS_URL=${{ secrets.UPSTASH_STAGING_REDIS_URL }} \
+            --env STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }} \
+            --scope ${{ secrets.VERCEL_ORG_ID }} \
+            --project-name koepon-api-staging \
+            --prod
+
+  # 統合テスト実行
+  integration-tests:
+    name: Integration Tests
+    needs: [deploy-frontend, deploy-backend]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Playwright
+        run: |
+          cd client/e2e
+          npm ci
+          npx playwright install --with-deps
+          
+      - name: Wait for deployment
+        run: sleep 30
+        
+      - name: Run E2E Tests
+        run: |
+          cd client/e2e
+          npx playwright test --config=playwright.staging.config.ts
+        env:
+          STAGING_BASE_URL: https://staging-koepon.vercel.app
+          STAGING_API_URL: https://koepon-api-staging.vercel.app
+          
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-staging
+          path: client/e2e/test-results/
+          
+      - name: Run Performance Tests
+        run: |
+          cd performance-tests
+          node staging-performance-validation.js
+        env:
+          STAGING_API_URL: https://koepon-api-staging.vercel.app
+          
+      - name: Run Security Scan
+        run: |
+          cd security-tests
+          npm run test:staging-security
+        env:
+          STAGING_BASE_URL: https://staging-koepon.vercel.app
+
+  # UAT環境準備・通知
+  prepare-uat:
+    name: Prepare UAT Environment
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Generate UAT Report
+        run: |
+          echo "# ステージング環境デプロイ完了 🎉" > uat-report.md
+          echo "" >> uat-report.md
+          echo "## 環境情報" >> uat-report.md
+          echo "- **フロントエンド**: https://staging-koepon.vercel.app" >> uat-report.md
+          echo "- **API**: https://koepon-api-staging.vercel.app" >> uat-report.md
+          echo "- **デプロイ日時**: $(date)" >> uat-report.md
+          echo "- **コミット**: ${{ github.sha }}" >> uat-report.md
+          echo "" >> uat-report.md
+          echo "## テストアカウント" >> uat-report.md
+          echo "- **管理者**: staging-admin@example.com / password123" >> uat-report.md
+          echo "- **VTuber**: staging-vtuber@example.com / password123" >> uat-report.md  
+          echo "- **一般ユーザー**: staging-user@example.com / password123" >> uat-report.md
+          echo "" >> uat-report.md
+          echo "## UAT 実施項目" >> uat-report.md
+          echo "- [ ] 基本機能テスト" >> uat-report.md
+          echo "- [ ] 新機能テスト" >> uat-report.md
+          echo "- [ ] 回帰テスト" >> uat-report.md
+          echo "- [ ] パフォーマンステスト" >> uat-report.md
+          echo "- [ ] セキュリティテスト" >> uat-report.md
+          echo "- [ ] ビジネス承認" >> uat-report.md
+          
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: |
+            🎉 *ステージング環境デプロイ完了*
+            
+            **環境**: https://staging-koepon.vercel.app
+            **API**: https://koepon-api-staging.vercel.app
+            **コミット**: `${{ github.sha }}`
+            
+            UAT開始可能です！テストアカウント:
+            • 管理者: `staging-admin@example.com`
+            • VTuber: `staging-vtuber@example.com`
+            • 一般: `staging-user@example.com`
+            
+            パスワード: `password123`
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          
+      - name: Create deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment?.id || 0,
+              state: 'success',
+              target_url: 'https://staging-koepon.vercel.app',
+              description: 'Staging deployment successful'
+            });
+
+  # 失敗時の処理
+  notify-failure:
+    name: Notify Failure
+    needs: [test-suite, deploy-supabase, deploy-frontend, deploy-backend, integration-tests]
+    runs-on: ubuntu-latest
+    if: failure()
+    
+    steps:
+      - name: Notify Slack (Failure)
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            ❌ *ステージング環境デプロイ失敗*
+            
+            **ブランチ**: ${{ github.ref }}
+            **コミット**: `${{ github.sha }}`
+            **実行URL**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            確認・修正をお願いします。
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

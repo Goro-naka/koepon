@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "こえポン！" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e9] [cursor=pointer]: こえポン！
+        - navigation [ref=e10]:
+          - link "VTuber" [ref=e11] [cursor=pointer]:
+            - /url: /vtubers
+          - link "イベント一覧" [ref=e12] [cursor=pointer]:
+            - /url: /gacha
+          - link "交換所" [ref=e13] [cursor=pointer]:
+            - /url: /exchange
+          - link "特典BOX" [ref=e14] [cursor=pointer]:
+            - /url: /rewards
+        - generic [ref=e16]:
+          - link "ログイン" [ref=e17] [cursor=pointer]:
+            - /url: /auth/login
+          - link "新規登録" [ref=e18] [cursor=pointer]:
+            - /url: /auth/register
+    - generic [ref=e20]:
+      - heading "ガチャ一覧" [level=1] [ref=e21]
+      - generic [ref=e22]:
+        - generic [ref=e25]: "!"
+        - heading "エラーが発生しました" [level=3] [ref=e26]
+        - paragraph [ref=e27]: ガチャ一覧の取得に失敗しました
+        - button "再試行" [ref=e28]
+  - generic [ref=e33] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e34] [cursor=pointer]:
+      - img [ref=e35] [cursor=pointer]
+    - generic [ref=e38] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e39] [cursor=pointer]:
+        - generic [ref=e40] [cursor=pointer]:
+          - generic [ref=e41] [cursor=pointer]: "0"
+          - generic [ref=e42] [cursor=pointer]: "1"
+        - generic [ref=e43] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e44] [cursor=pointer]:
+        - img [ref=e45] [cursor=pointer]
+  - alert [ref=e47]
+```

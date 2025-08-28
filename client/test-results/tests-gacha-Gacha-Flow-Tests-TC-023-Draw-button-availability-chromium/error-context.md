@@ -1,0 +1,58 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "こえポン！" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e9] [cursor=pointer]: こえポン！
+        - navigation [ref=e10]:
+          - link "VTuber" [ref=e11] [cursor=pointer]:
+            - /url: /vtubers
+          - link "イベント一覧" [ref=e12] [cursor=pointer]:
+            - /url: /gacha
+          - link "交換所" [ref=e13] [cursor=pointer]:
+            - /url: /exchange
+          - link "特典BOX" [ref=e14] [cursor=pointer]:
+            - /url: /rewards
+        - generic [ref=e16]:
+          - link "ログイン" [ref=e17] [cursor=pointer]:
+            - /url: /auth/login
+          - link "新規登録" [ref=e18] [cursor=pointer]:
+            - /url: /auth/register
+    - generic [ref=e19]:
+      - heading "ログイン" [level=1] [ref=e20]
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "ログイン" [level=1] [ref=e23]
+          - paragraph [ref=e24]: こえポン！にログインしてください
+        - form "ログイン" [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]: メールアドレス
+            - textbox "メールアドレス" [ref=e28]: test@koepon.com
+          - generic [ref=e29]:
+            - generic [ref=e30]: パスワード
+            - generic [ref=e31]:
+              - textbox "パスワード" [ref=e32]: TestPass123!
+              - button "パスワードを表示" [ref=e33]:
+                - img
+          - generic [ref=e34]:
+            - checkbox "ログイン状態を保持する" [ref=e35]
+            - checkbox
+            - generic [ref=e36] [cursor=pointer]: ログイン状態を保持する
+          - button "ログイン中..." [disabled]:
+            - img
+            - text: ログイン中...
+        - generic [ref=e37]:
+          - link "パスワードを忘れた方はこちら" [ref=e38] [cursor=pointer]:
+            - /url: /password-reset
+          - paragraph [ref=e39]:
+            - text: アカウントをお持ちでない方は
+            - link "こちらから登録" [ref=e40] [cursor=pointer]:
+              - /url: /register
+  - button "Open Next.js Dev Tools" [ref=e46] [cursor=pointer]:
+    - img [ref=e47] [cursor=pointer]
+  - alert [ref=e50]
+```

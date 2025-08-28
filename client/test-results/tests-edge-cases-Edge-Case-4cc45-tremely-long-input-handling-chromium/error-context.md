@@ -1,0 +1,75 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "こえポン！" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e9] [cursor=pointer]: こえポン！
+        - navigation [ref=e10]:
+          - link "VTuber" [ref=e11] [cursor=pointer]:
+            - /url: /vtubers
+          - link "イベント一覧" [ref=e12] [cursor=pointer]:
+            - /url: /gacha
+          - link "交換所" [ref=e13] [cursor=pointer]:
+            - /url: /exchange
+          - link "特典BOX" [ref=e14] [cursor=pointer]:
+            - /url: /rewards
+        - generic [ref=e16]:
+          - link "ログイン" [ref=e17] [cursor=pointer]:
+            - /url: /auth/login
+          - link "新規登録" [ref=e18] [cursor=pointer]:
+            - /url: /auth/register
+    - generic [ref=e19]:
+      - heading "会員登録" [level=1] [ref=e20]
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "アカウント作成" [level=1] [ref=e23]
+          - paragraph [ref=e24]: こえポン！のアカウントを作成してください
+        - form "アカウント作成" [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]: メールアドレス
+            - textbox "メールアドレス" [active] [ref=e28]: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com
+          - generic [ref=e29]:
+            - generic [ref=e30]: 表示名（任意）
+            - textbox "表示名（任意）" [ref=e31]
+          - generic [ref=e32]:
+            - generic [ref=e33]: パスワード
+            - generic [ref=e34]:
+              - textbox "パスワード" [ref=e35]
+              - button "パスワードを表示" [ref=e36]:
+                - img
+          - generic [ref=e37]:
+            - generic [ref=e38]: パスワード確認
+            - generic [ref=e39]:
+              - textbox "パスワード確認" [ref=e40]
+              - button "パスワード確認を表示" [ref=e41]:
+                - img
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - checkbox "利用規約に同意します" [ref=e44]
+              - checkbox
+              - generic [ref=e45] [cursor=pointer]:
+                - link "利用規約" [ref=e46] [cursor=pointer]:
+                  - /url: /terms
+                - text: に同意します
+            - generic [ref=e47]:
+              - checkbox "プライバシーポリシーに同意します" [ref=e48]
+              - checkbox
+              - generic [ref=e49] [cursor=pointer]:
+                - link "プライバシーポリシー" [ref=e50] [cursor=pointer]:
+                  - /url: /privacy
+                - text: に同意します
+            - generic [ref=e51]:
+              - checkbox "マーケティング情報の受信に同意します（任意）" [ref=e52]
+              - checkbox
+              - generic [ref=e53] [cursor=pointer]: マーケティング情報の受信に同意します（任意）
+          - button "アカウント作成" [ref=e54]
+        - paragraph [ref=e56]:
+          - text: すでにアカウントをお持ちの方は
+          - link "こちらからログイン" [ref=e57] [cursor=pointer]:
+            - /url: /login
+  - alert [ref=e58]
+```
