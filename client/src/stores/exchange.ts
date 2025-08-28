@@ -122,6 +122,62 @@ const dummyExchangeItems: ExchangeItem[] = [
     imageUrl: '/exchange/shirayuki-snowman.jpg',
     availableUntil: new Date('2025-12-25'),
     popularity: 75
+  },
+  {
+    id: '5',
+    name: '紅葉あやねの秋の歌声',
+    description: '秋の名曲を歌った特別音源（3曲セット）',
+    category: 'voice',
+    vtuberName: '紅葉あやね',
+    cost: 700,
+    stock: 60,
+    limitPerUser: 2,
+    isAvailable: true,
+    imageUrl: '/exchange/kouyou-autumn-songs.jpg',
+    availableUntil: new Date('2025-11-30'),
+    popularity: 80
+  },
+  {
+    id: '6',
+    name: '星月ひなの配信セットアップガイド',
+    description: '配信機材セットアップの詳細ガイドPDF',
+    category: 'digital',
+    vtuberName: '星月ひな',
+    cost: 300,
+    stock: 150,
+    limitPerUser: 5,
+    isAvailable: true,
+    imageUrl: '/exchange/hoshitsuki-setup-guide.jpg',
+    availableUntil: new Date('2025-12-31'),
+    popularity: 68
+  },
+  {
+    id: '7',
+    name: '桜井みおの料理レシピ集',
+    description: 'VTuberおすすめの簡単料理レシピ（20種類）',
+    category: 'digital',
+    vtuberName: '桜井みお',
+    cost: 450,
+    stock: 90,
+    limitPerUser: 3,
+    isAvailable: true,
+    imageUrl: '/exchange/sakurai-recipes.jpg',
+    availableUntil: new Date('2025-11-15'),
+    popularity: 72
+  },
+  {
+    id: '8',
+    name: '音羽ゆめのゲーム配信ハイライト',
+    description: 'ベストシーンをまとめた特別編集動画（45分）',
+    category: 'video',
+    vtuberName: '音羽ゆめ',
+    cost: 550,
+    stock: 75,
+    limitPerUser: 2,
+    isAvailable: true,
+    imageUrl: '/exchange/otowa-gaming-highlights.jpg',
+    availableUntil: new Date('2025-10-31'),
+    popularity: 85
   }
 ]
 
