@@ -7,7 +7,7 @@
     "dev": "tsx watch src/main.ts",
     "build": "tsc",
     "start": "node dist/main.js",
-    "vercel-build": "echo 'Skipping build for now' && mkdir -p dist && echo 'module.exports = require(\"./main\");' > dist/index.js && tsc src/main.ts src/modules/vtuber/*.ts src/modules/gacha/*.ts src/modules/database/*.ts src/app.module.ts --outDir dist --skipLibCheck || true",
+    "vercel-build": "tsc --build --force || true",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
