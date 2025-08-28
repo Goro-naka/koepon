@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useExchangeStore } from '@/stores/exchange'
 import { useMedalStore } from '@/stores/medal'
 import { formatMedalAmountWithUnit } from '@/lib/medal-utils'
@@ -46,14 +46,14 @@ export const ExchangePage: React.FC = () => {
     if (exchangeItems.length === 0) {
       fetchExchangeItems()
     }
-  }, [exchangeItems.length, fetchExchangeItems])
+  }, [exchangeItems.length]) // fetchExchangeItemsを依存関係から除去
 
   // VTuberが未選択で、VTuberが存在する場合は最初のVTuberを自動選択
   useEffect(() => {
-    if (!selectedVtuber && vtubers.length > 0) {
-      setSelectedVtuber(vtubers[0].vtuberName)
+    if (!selectedVtuber && medalBalance?.vtuberBalances && medalBalance.vtuberBalances.length > 0) {
+      setSelectedVtuber(medalBalance.vtuberBalances[0].vtuberName)
     }
-  }, [selectedVtuber, vtubers])
+  }, [selectedVtuber, medalBalance?.vtuberBalances])
 
   if (exchangeItemsLoading) {
     return (
@@ -142,7 +142,9 @@ export const ExchangePage: React.FC = () => {
 
   const selectedItemData = exchangeItems.find(item => item.id === selectedItem)
 
-  const vtubers = medalBalance?.vtuberBalances || []
+  const vtubers = useMemo(() => {
+    return medalBalance?.vtuberBalances || []
+  }, [medalBalance?.vtuberBalances])
 
   return (
     <div className="space-y-6">
