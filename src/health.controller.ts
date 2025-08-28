@@ -3,7 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 
 @ApiTags('Health')
-@Controller('health')
+@Controller()
 export class HealthController {
   private readonly supabase: SupabaseClient;
   private readonly adminClient: SupabaseClient;
@@ -22,6 +22,25 @@ export class HealthController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'ルートエンドポイント' })
+  @ApiResponse({ status: 200, description: 'API基本情報を返す' })
+  root() {
+    return {
+      message: 'Koepon API is running!',
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      service: 'koepon-api',
+      environment: process.env.NODE_ENV ?? 'development',
+      endpoints: {
+        health: '/api/v1/health',
+        database: '/api/v1/health/database',
+        docs: '/api/v1/docs'
+      }
+    };
+  }
+
+  @Get('health')
   @ApiOperation({ summary: 'サーバー基本ヘルスチェック' })
   @ApiResponse({ status: 200, description: 'サーバー稼働状況を返す' })
   health() {
@@ -35,7 +54,7 @@ export class HealthController {
     };
   }
 
-  @Get('ready')
+  @Get('health/ready')
   @ApiOperation({ summary: 'サーバー準備状況チェック' })
   @ApiResponse({ status: 200, description: 'サーバーとDBの準備状況を返す' })
   async ready() {
@@ -55,14 +74,14 @@ export class HealthController {
     };
   }
 
-  @Get('database')
+  @Get('health/database')
   @ApiOperation({ summary: 'データベース接続チェック' })
   @ApiResponse({ status: 200, description: 'データベース接続状況を返す' })
   async database() {
     return await this.checkHealth();
   }
 
-  @Get('stats')
+  @Get('health/stats')
   @ApiOperation({ summary: 'データベーステーブル統計' })
   @ApiResponse({ status: 200, description: '各テーブルのレコード数を返す' })
   async stats() {
