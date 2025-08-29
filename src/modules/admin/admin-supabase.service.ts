@@ -101,9 +101,7 @@ export class AdminSupabaseService {
       };
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
-      
-      // Fallback to mock data if database queries fail
-      return this.getMockDashboardStats();
+      throw error;
     }
   }
 
@@ -146,81 +144,8 @@ export class AdminSupabaseService {
       }));
     } catch (error) {
       console.error('Error fetching users:', error);
-      return this.getMockUsers();
+      throw error;
     }
   }
 
-  private getMockDashboardStats(): DashboardStats {
-    return {
-      systemOverview: {
-        totalUsers: 1234,
-        newUsersToday: 12,
-        newUsersThisMonth: 89,
-        totalVTubers: 89,
-        pendingApplications: 3,
-        approvalRate: 85.6,
-        totalRevenue: 1234567,
-        monthlyRevenue: 234567,
-        revenueGrowth: 12.5,
-        activeUsersDAU: 234,
-        activeUsersMAU: 567,
-        systemAlerts: [
-          {
-            id: '1',
-            level: 'warning',
-            message: 'High CPU usage detected on server-02',
-            timestamp: new Date().toISOString(),
-            acknowledged: false,
-            source: 'system_monitor'
-          }
-        ]
-      },
-      systemStatus: {
-        apiResponseTime: 145,
-        errorRate: 0.02,
-        databaseStatus: 'healthy',
-        cacheHitRate: 94.2,
-        storageUsage: {
-          used: 234567890,
-          total: 1000000000,
-          percentage: 23.4
-        }
-      },
-      dateRange: {
-        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
-      }
-    };
-  }
-
-  private getMockUsers() {
-    return [
-      {
-        id: '1',
-        email: 'user1@example.com',
-        displayName: 'ユーザー1',
-        registrationDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        lastLoginDate: new Date().toISOString(),
-        status: 'active',
-        totalGachaDraws: 45,
-        totalSpent: 12000,
-        medalBalance: 2500,
-        rewardCount: 15,
-        riskScore: 0.2
-      },
-      {
-        id: '2',
-        email: 'user2@example.com',
-        displayName: 'ユーザー2',
-        registrationDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-        lastLoginDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        status: 'active',
-        totalGachaDraws: 23,
-        totalSpent: 8500,
-        medalBalance: 1200,
-        rewardCount: 8,
-        riskScore: 0.1
-      }
-    ];
-  }
 }
