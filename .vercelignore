@@ -1,0 +1,2 @@
+# Exclude API endpoints from authentication protection
+api/v1/**
