@@ -2,7 +2,7 @@
   "name": "koepon",
   "version": "1.0.0",
   "description": "Individual VTuber digital content gacha platform with Oshi Medal system",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
     "dev": "tsx watch src/main.ts",
     "build": "tsc",
