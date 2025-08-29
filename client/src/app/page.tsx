@@ -151,7 +151,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-700 mb-4">VTuberデータを読み込み中...</p>
+                <p className="text-gray-700 mb-4">VTuberが登録されていません</p>
               </div>
             )}
 

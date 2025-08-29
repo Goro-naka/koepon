@@ -123,7 +123,7 @@ export default function VTubersPage() {
                     <div className="text-gray-400 text-xl">👤</div>
                   </div>
                 </div>
-                <p className="text-gray-700 text-lg">VTuberデータを読み込み中...</p>
+                <p className="text-gray-700 text-lg">VTuberが登録されていません</p>
               </div>
             )}
           </Container>
