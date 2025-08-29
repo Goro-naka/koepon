@@ -50,7 +50,7 @@ export class AdminSupabaseService {
     try {
       // Get user statistics
       const { count: totalUsers } = await supabase
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true });
 
       // Get VTuber statistics
@@ -110,7 +110,7 @@ export class AdminSupabaseService {
     
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,
