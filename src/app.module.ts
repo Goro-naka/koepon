@@ -48,7 +48,7 @@ import { SupabaseService } from './common/supabase/supabase.service';
     // RewardModule,    // TODO: Fix dependencies
     // ExchangeModule,  // TODO: Fix TypeORM entity error
   ],
-  controllers: [HealthController, AdminMockController],
+  controllers: [HealthController],
   providers: [
     CustomLoggerService,
     SupabaseService,
