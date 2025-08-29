@@ -3,7 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminSupabaseService } from './admin-supabase.service';
 
 @ApiTags('Admin')
-@Controller('api/v1/admin')
+@Controller('admin')
 export class AdminSupabaseController {
   constructor(private readonly adminSupabaseService: AdminSupabaseService) {}
 
