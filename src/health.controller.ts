@@ -30,7 +30,7 @@ export class HealthController {
     const dbHealth = await this.checkHealth();
     const tableStats = await this.getTableStats();
     
-    return {
+    const response = {
       message: 'Koepon API is running!',
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -48,6 +48,16 @@ export class HealthController {
         docs: '/api/v1/docs'
       }
     };
+
+    // Add noindex header for staging environment
+    if (process.env.NODE_ENV !== 'production') {
+      response['seo'] = {
+        robots: 'noindex, nofollow',
+        environment: 'staging'
+      };
+    }
+    
+    return response;
   }
 
   @Get('health')

@@ -55,6 +55,14 @@ async function bootstrap() {
 
   // Global prefix
   app.setGlobalPrefix('api/v1');
+  
+  // Add noindex header for staging environment
+  if (env !== 'production') {
+    app.use((req, res, next) => {
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+      next();
+    });
+  }
 
   // Swagger documentation setup
   if (env === 'development' || configService.get<boolean>('ENABLE_SWAGGER', true)) {
