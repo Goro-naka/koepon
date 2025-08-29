@@ -29,10 +29,7 @@
     "esModuleInterop": true
   },
   "include": [
-    "src/main.ts",
-    "src/app.module.ts", 
-    "src/health.controller.ts",
-    "src/common/logger/logger.service.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
@@ -41,6 +38,14 @@
     "**/*.test.ts",
     "**/*.spec.ts",
     "src/__tests__/**/*",
-    "src/test/**/*"
+    "src/test/**/*",
+    "src/main.mock.ts",
+    "src/modules/auth/**/*",
+    "src/modules/user/**/*",
+    "src/modules/database/**/*",
+    "src/modules/vtuber-application/**/*",
+    "src/modules/admin/admin.controller.ts",
+    "src/modules/admin/admin.service.ts",
+    "src/payment/**/*"
   ]
 }

@@ -10,6 +10,21 @@ import { HealthController } from '../../health.controller';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get('DATABASE_URL');
+        
+        if (databaseUrl) {
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+            synchronize: configService.get('NODE_ENV') === 'development',
+            ssl: {
+              rejectUnauthorized: false,
+            },
+            logging: configService.get('NODE_ENV') === 'development',
+          };
+        }
+        
         const host = configService.get('SUPABASE_HOST');
         const port = configService.get('SUPABASE_PORT', 5432);
         const username = configService.get('SUPABASE_USERNAME', 'postgres');

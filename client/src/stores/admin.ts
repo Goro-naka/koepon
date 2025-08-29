@@ -79,6 +79,16 @@ export interface AdminStore {
   performUserAction: (userId: string, action: AdminAction) => Promise<void>
   selectUser: (userId: string) => Promise<void>
   
+  // VTuber CRUD Actions
+  createVTuber: (data: any) => Promise<boolean>
+  updateVTuber: (id: string, data: any) => Promise<boolean>
+  deleteVTuber: (id: string) => Promise<boolean>
+  
+  // Gacha CRUD Actions
+  createGacha: (data: any) => Promise<boolean>
+  updateGacha: (id: string, data: any) => Promise<boolean>
+  deleteGacha: (id: string) => Promise<boolean>
+  
   // Utility Actions
   clearErrors: () => void
   setLoading: (key: string, loading: boolean) => void
@@ -336,6 +346,134 @@ export const useAdminStore = create<AdminStore>()(
           set({ selectedUser: response.data })
         } catch (_error) {
           console.error("Error:", _error)
+        }
+      },
+
+      // VTuber CRUD Actions
+      createVTuber: async (data: any) => {
+        set({ isLoading: true, error: null })
+        try {
+          const response = await apiClient.post('/api/admin/vtubers', data)
+          set({ isLoading: false, error: null })
+          return response.data?.success || true
+        } catch (_error) {
+          const errorMessage = _error instanceof Error
+            ? _error.message
+            : 'VTuber作成に失敗しました'
+          
+          console.error("Error:", _error)
+          
+          set({
+            isLoading: false,
+            errors: { ...get().errors, vtuberCreate: errorMessage },
+          })
+          return false
+        }
+      },
+
+      updateVTuber: async (id: string, data: any) => {
+        set({ isLoading: true, error: null })
+        try {
+          const response = await apiClient.post(`/api/admin/vtubers/${id}`, data)
+          set({ isLoading: false, error: null })
+          return response.data?.success || true
+        } catch (_error) {
+          const errorMessage = _error instanceof Error
+            ? _error.message
+            : 'VTuber更新に失敗しました'
+          
+          console.error("Error:", _error)
+          
+          set({
+            isLoading: false,
+            errors: { ...get().errors, vtuberUpdate: errorMessage },
+          })
+          return false
+        }
+      },
+
+      deleteVTuber: async (id: string) => {
+        set({ isLoading: true, error: null })
+        try {
+          const response = await apiClient.delete(`/api/admin/vtubers/${id}`)
+          set({ isLoading: false, error: null })
+          return response.data?.success || true
+        } catch (_error) {
+          const errorMessage = _error instanceof Error
+            ? _error.message
+            : 'VTuber削除に失敗しました'
+          
+          console.error("Error:", _error)
+          
+          set({
+            isLoading: false,
+            errors: { ...get().errors, vtuberDelete: errorMessage },
+          })
+          return false
+        }
+      },
+
+      // Gacha CRUD Actions
+      createGacha: async (data: any) => {
+        set({ isLoading: true, error: null })
+        try {
+          const response = await apiClient.post('/api/admin/gacha', data)
+          set({ isLoading: false, error: null })
+          return response.data?.success || true
+        } catch (_error) {
+          const errorMessage = _error instanceof Error
+            ? _error.message
+            : 'ガチャ作成に失敗しました'
+          
+          console.error("Error:", _error)
+          
+          set({
+            isLoading: false,
+            errors: { ...get().errors, gachaCreate: errorMessage },
+          })
+          return false
+        }
+      },
+
+      updateGacha: async (id: string, data: any) => {
+        set({ isLoading: true, error: null })
+        try {
+          const response = await apiClient.post(`/api/admin/gacha/${id}`, data)
+          set({ isLoading: false, error: null })
+          return response.data?.success || true
+        } catch (_error) {
+          const errorMessage = _error instanceof Error
+            ? _error.message
+            : 'ガチャ更新に失敗しました'
+          
+          console.error("Error:", _error)
+          
+          set({
+            isLoading: false,
+            errors: { ...get().errors, gachaUpdate: errorMessage },
+          })
+          return false
+        }
+      },
+
+      deleteGacha: async (id: string) => {
+        set({ isLoading: true, error: null })
+        try {
+          const response = await apiClient.delete(`/api/admin/gacha/${id}`)
+          set({ isLoading: false, error: null })
+          return response.data?.success || true
+        } catch (_error) {
+          const errorMessage = _error instanceof Error
+            ? _error.message
+            : 'ガチャ削除に失敗しました'
+          
+          console.error("Error:", _error)
+          
+          set({
+            isLoading: false,
+            errors: { ...get().errors, gachaDelete: errorMessage },
+          })
+          return false
         }
       },
 

@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   },
   // 環境変数
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002',
   },
   // デプロイ時のlint無効化（一時的）
   eslint: {

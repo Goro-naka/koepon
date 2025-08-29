@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -5,6 +7,8 @@ import { Button } from '@/components/ui/button'
 const MENU_ITEMS = [
   { key: 'dashboard', label: 'ダッシュボード', path: '/admin/dashboard' },
   { key: 'vtuber-review', label: 'VTuber審査', path: '/admin/vtuber-review' },
+  { key: 'vtuber-management', label: 'VTuber管理', path: '/admin/vtuber-management' },
+  { key: 'gacha-management', label: 'ガチャ管理', path: '/admin/gacha-management' },
   { key: 'system-monitoring', label: 'システム監視', path: '/admin/system-monitoring' },
   { key: 'user-management', label: 'ユーザー管理', path: '/admin/user-management' },
   { key: 'settings', label: '設定', path: '/admin/settings' },
@@ -13,6 +17,8 @@ const MENU_ITEMS = [
 const BREADCRUMB_MAP: Record<string, string> = {
   '/admin/dashboard': 'ダッシュボード',
   '/admin/vtuber-review': 'VTuber審査',
+  '/admin/vtuber-management': 'VTuber管理',
+  '/admin/gacha-management': 'ガチャ管理',
   '/admin/system-monitoring': 'システム監視',
   '/admin/user-management': 'ユーザー管理',
   '/admin/settings': '設定',

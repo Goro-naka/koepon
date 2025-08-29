@@ -1,5 +1,7 @@
 export { AdminLayout } from './AdminLayout'
 export { AdminDashboardPage } from './AdminDashboardPage'
 export { VTuberReviewPage } from './VTuberReviewPage'
+export { VTuberManagementPage } from './VTuberManagementPage'
+export { GachaManagementPage } from './GachaManagementPage'
 export { SystemMonitoringPage } from './SystemMonitoringPage'
 export { UserManagementPage } from './UserManagementPage'

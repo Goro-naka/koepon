@@ -9,22 +9,27 @@ export class HealthController {
   private readonly adminClient: SupabaseClient;
 
   constructor() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !anonKey || !serviceRoleKey) {
-      throw new Error('Supabase configuration is missing');
+    if (supabaseUrl && anonKey && serviceRoleKey) {
+      this.supabase = createClient(supabaseUrl, anonKey);
+      this.adminClient = createClient(supabaseUrl, serviceRoleKey);
+    } else {
+      console.warn('Supabase configuration is missing - database features will be disabled');
+      this.supabase = null as any;
+      this.adminClient = null as any;
     }
-
-    this.supabase = createClient(supabaseUrl, anonKey);
-    this.adminClient = createClient(supabaseUrl, serviceRoleKey);
   }
 
   @Get()
   @ApiOperation({ summary: 'ルートエンドポイント' })
   @ApiResponse({ status: 200, description: 'API基本情報を返す' })
-  root() {
+  async root() {
+    const dbHealth = await this.checkHealth();
+    const tableStats = await this.getTableStats();
+    
     return {
       message: 'Koepon API is running!',
       status: 'ok',
@@ -32,6 +37,11 @@ export class HealthController {
       version: '1.0.0',
       service: 'koepon-api',
       environment: process.env.NODE_ENV ?? 'development',
+      database: {
+        status: dbHealth.status,
+        connection: dbHealth.status === 'healthy' ? 'connected' : 'disconnected',
+        tables: tableStats
+      },
       endpoints: {
         health: '/api/v1/health',
         database: '/api/v1/health/database',
@@ -103,6 +113,13 @@ export class HealthController {
 
   private async checkHealth(): Promise<{ status: string; timestamp: string; details?: unknown }> {
     try {
+      if (!this.supabase) {
+        return {
+          status: 'unavailable',
+          timestamp: new Date().toISOString(),
+          details: { message: 'Database connection not configured' }
+        };
+      }
       // Test basic connectivity with profiles table
       const { error } = await this.supabase
         .from('profiles')
@@ -135,6 +152,9 @@ export class HealthController {
 
   private async getTableStats(): Promise<Record<string, number>> {
     try {
+      if (!this.adminClient) {
+        return { status: -1 as any, message: 'Database not configured' as any };
+      }
       const tables = ['profiles', 'vtubers', 'gachas', 'gacha_items', 'oshi_medals'];
       const stats: Record<string, number> = {};
 

@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 // Create axios instance
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001'),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -36,7 +36,7 @@ apiClient.interceptors.response.use(
       if (refreshToken) {
         try {
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/auth/refresh`,
+            `${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001')}/api/v1/auth/refresh`,
             { refreshToken }
           )
           

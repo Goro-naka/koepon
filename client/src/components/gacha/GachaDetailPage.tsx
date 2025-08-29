@@ -6,6 +6,7 @@ import { useGachaStore } from '@/stores/gacha'
 import { Button } from '@/components/ui/button'
 import { VTuberAvatar } from '@/components/ui/vtuber-avatar'
 import { ItemImage } from '@/components/ui/item-image'
+import { PaymentButton } from '@/components/payment/PaymentButton'
 
 function LoadingSkeleton() {
   return (
@@ -288,13 +289,19 @@ export function GachaDetailPage() {
                 <span className="text-xl font-bold">¥{selectedGacha.singlePrice.toLocaleString()}</span>
               </div>
               <p className="text-sm text-gray-800 mb-3">1回分のガチャを引けます</p>
-              <Button
-                className="w-full"
-                disabled={isExpired || drawState === 'drawing' || drawState === 'payment'}
-                onClick={() => handleDrawClick(1, selectedGacha.singlePrice)}
-              >
-                ¥{selectedGacha.singlePrice}で購入
-              </Button>
+              <PaymentButton
+                gachaId={selectedGacha.id}
+                amount={selectedGacha.singlePrice}
+                pullType="single"
+                onPaymentSuccess={(paymentIntentId) => {
+                  // After successful payment, execute gacha
+                  executeDraw(selectedGacha.id, 1)
+                }}
+                onPaymentError={(error) => {
+                  console.error('Payment failed:', error)
+                  // Handle payment error - could show error message
+                }}
+              />
             </div>
 
             {/* 10-Draw */}
@@ -307,13 +314,19 @@ export function GachaDetailPage() {
                 </div>
               </div>
               <p className="text-sm text-gray-800 mb-3">10回分のガチャを一度に引けます</p>
-              <Button
-                className="w-full"
-                disabled={isExpired || drawState === 'drawing' || drawState === 'payment'}
-                onClick={() => handleDrawClick(10, selectedGacha.tenDrawPrice)}
-              >
-                ¥{selectedGacha.tenDrawPrice}で10連購入
-              </Button>
+              <PaymentButton
+                gachaId={selectedGacha.id}
+                amount={selectedGacha.tenDrawPrice}
+                pullType="ten"
+                onPaymentSuccess={(paymentIntentId) => {
+                  // After successful payment, execute gacha
+                  executeDraw(selectedGacha.id, 10)
+                }}
+                onPaymentError={(error) => {
+                  console.error('Payment failed:', error)
+                  // Handle payment error - could show error message
+                }}
+              />
             </div>
           </div>
 

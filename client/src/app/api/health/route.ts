@@ -1,9 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { ApiClient } from '@/lib/api-client'
 
-export async function GET() {
-  return NextResponse.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  })
+export async function GET(request: NextRequest) {
+  return ApiClient.proxyRequest('/health', request)
 }
