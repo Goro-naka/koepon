@@ -125,7 +125,7 @@ export class AdminSupabaseService {
 
       if (error) {
         console.error('Error fetching users:', error);
-        return this.getMockUsers();
+        throw error;
       }
 
       // Transform Supabase data to expected format
