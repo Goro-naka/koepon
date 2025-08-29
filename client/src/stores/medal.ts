@@ -38,18 +38,12 @@ export interface MedalStore {
   clearTransactionFilters: () => void
 }
 
-// ダミーメダル残高データ
+// データベースから取得するため、ダミーデータは空に
 const dummyMedalBalance: MedalBalance = {
-  totalMedals: 2500,
-  availableMedals: 2500,
+  totalMedals: 0,
+  availableMedals: 0,
   lockedMedals: 0,
-  vtuberBalances: [
-    { vtuberName: '星月ひな', balance: 500 },
-    { vtuberName: '桜井みお', balance: 400 },
-    { vtuberName: '音羽ゆめ', balance: 350 },
-    { vtuberName: '白雪りん', balance: 300 },
-    { vtuberName: '紅葉あやね', balance: 250 },
-  ],
+  vtuberBalances: [],
   lastUpdated: new Date().toISOString()
 }
 

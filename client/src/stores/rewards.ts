@@ -55,84 +55,8 @@ export interface RewardsStore {
 
 const MAX_CONCURRENT_DOWNLOADS = 3
 
-// ダミーリワードデータ
-const dummyRewards: Reward[] = [
-  {
-    id: '1',
-    name: '星月ひなの「おはよう」ボイス',
-    description: '朝の挨拶を特別な声でお届け',
-    category: 'voice',
-    vtuberName: '星月ひな',
-    rarity: 'UR',
-    thumbnailUrl: '/rewards/hoshitsuki-voice-ohayou.jpg',
-    fileSize: 2500000,
-    acquiredAt: '2025-08-25T10:30:00Z',
-    isNew: true,
-    isFavorite: false,
-    downloadCount: 0,
-    tags: ['朝', '挨拶', '限定']
-  },
-  {
-    id: '2',
-    name: '桜井みおの直筆イラスト',
-    description: 'VTuber本人が描いた特別なイラスト',
-    category: 'illustration',
-    vtuberName: '桜井みお',
-    rarity: 'SSR',
-    thumbnailUrl: '/rewards/sakurai-illustration.jpg',
-    fileSize: 4500000,
-    acquiredAt: '2025-08-24T15:20:00Z',
-    isNew: true,
-    isFavorite: true,
-    downloadCount: 2,
-    tags: ['イラスト', '直筆', '限定']
-  },
-  {
-    id: '3',
-    name: '音羽ゆめのメッセージカード',
-    description: 'ファンへの感謝のメッセージ',
-    category: 'message',
-    vtuberName: '音羽ゆめ',
-    rarity: 'SR',
-    thumbnailUrl: '/rewards/otowa-message.jpg',
-    fileSize: 1800000,
-    acquiredAt: '2025-08-23T12:45:00Z',
-    isNew: false,
-    isFavorite: false,
-    downloadCount: 1,
-    tags: ['メッセージ', '感謝']
-  },
-  {
-    id: '4',
-    name: '白雪りんのスタンプセット',
-    description: 'チャットで使える可愛いスタンプ',
-    category: 'stamp',
-    vtuberName: '白雪りん',
-    rarity: 'R',
-    thumbnailUrl: '/rewards/shirayuki-stamps.jpg',
-    fileSize: 3200000,
-    acquiredAt: '2025-08-22T09:15:00Z',
-    isNew: false,
-    isFavorite: true,
-    downloadCount: 5,
-    tags: ['スタンプ', 'かわいい']
-  },
-  {
-    id: '5',
-    name: '紅葉あやねの秋の詩朗読',
-    description: '秋をテーマにした美しい詩の朗読',
-    category: 'voice',
-    vtuberName: '紅葉あやね',
-    rarity: 'SR',
-    thumbnailUrl: '/rewards/momiji-poem.jpg',
-    fileSize: 5100000,
-    acquiredAt: '2025-08-21T16:30:00Z',
-    isNew: false,
-    isFavorite: false,
-    downloadCount: 3,
-    tags: ['朗読', '秋', '詩']
-  }
-]
+// データベースから取得するため、ダミーデータは空に
+const dummyRewards: Reward[] = []
 
 export const useRewardsStore = create<RewardsStore>((set, get) => ({
   // Initial state
