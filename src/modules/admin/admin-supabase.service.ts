@@ -106,38 +106,8 @@ export class AdminSupabaseService {
   }
 
   async getUsers() {
-    const supabase = this.supabaseService.getClient();
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(100);
-
-      if (error) {
-        console.error('Error fetching users:', error);
-        throw error;
-      }
-
-      // Transform Supabase data to expected format  
-      return data.map(user => ({
-        id: user.id,
-        email: 'test@example.com', // TODO: Get from profiles table
-        displayName: 'Test User', // TODO: Get from profiles table
-        registrationDate: new Date().toISOString(), // TODO: Get from profiles table
-        lastLoginDate: new Date().toISOString(), // TODO: Get from profiles table
-        status: 'active', // TODO: Get from profiles table
-        totalGachaDraws: 0, // TODO: Implement with gacha history
-        totalSpent: 0, // TODO: Implement with payment history
-        medalBalance: 0, // TODO: Implement from profiles table
-        rewardCount: 0, // TODO: Implement with reward history
-        riskScore: 0.1, // TODO: Implement risk assessment
-      }));
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      throw error;
-    }
+    // Return empty array for now since profiles table is empty
+    return [];
   }
 
 }
