@@ -2,11 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { CustomLoggerService } from './common/logger/logger.service';
 import { HealthController } from './health.controller';
-import { AdminMockController } from './admin.mock.controller';
 
 // Import implemented modules
 import { AdminSupabaseModule } from './modules/admin/admin-supabase.module';
@@ -15,11 +12,6 @@ import { SupabaseService } from './common/supabase/supabase.service';
 
 @Module({
   imports: [
-    // Serve static files
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      exclude: ['/api/v1*'],
-    }),
     
     // Global configuration
     ConfigModule.forRoot({
